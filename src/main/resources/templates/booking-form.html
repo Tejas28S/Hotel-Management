@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reserve Room — Elite Stays</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F4F0;--white:#FFFFFF;--dark:#1A1A1A;--gold:#A8832A;--border:#E5DFD7;--muted:#7A7166;--text:#2D2A26;--font-h:'Cormorant Garamond',Georgia,serif;--font-b:'Outfit',sans-serif}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav{max-width:1200px;margin:0 auto;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--font-h);font-size:1.55rem;color:var(--dark);text-decoration:none}
+.nav-logo span{color:var(--gold);font-style:italic}
+.nav-back{font-size:.82rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--gold)}
+main{flex:1;max-width:860px;margin:0 auto;width:100%;padding:48px 32px 80px}
+.page-tag{font-size:.65rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.page-title{font-family:var(--font-h);font-size:2.4rem;font-weight:400;color:var(--dark);margin-bottom:32px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.card{background:var(--white);border:1px solid var(--border);padding:28px}
+.card-title{font-family:var(--font-h);font-size:1.35rem;font-weight:600;color:var(--dark);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.room-preview img{width:100%;height:180px;object-fit:cover;display:block;margin-bottom:16px}
+.room-detail-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.88rem}
+.room-detail-item:last-child{border-bottom:none}
+.room-detail-item .label{color:var(--muted)}
+.room-detail-item .value{font-weight:500;color:var(--dark)}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font-b);font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--gold)}
+.summary-box{background:var(--bg);border:1px solid var(--border);padding:16px;margin:20px 0;display:flex;justify-content:space-between;align-items:center}
+.summary-box .nights{font-size:.88rem;color:var(--muted)}
+.summary-box .nights strong{display:block;font-size:1.1rem;color:var(--dark);font-weight:600}
+.summary-box .total-price{font-family:var(--font-h);font-size:1.9rem;font-weight:600;color:var(--gold);text-align:right}
+.summary-box .total-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.btn-confirm{width:100%;padding:14px;background:var(--gold);color:#fff;font-family:var(--font-b);font-size:.88rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s;margin-bottom:10px}
+.btn-confirm:hover{background:var(--dark)}
+.btn-cancel{width:100%;padding:12px;background:transparent;color:var(--muted);font-family:var(--font-b);font-size:.85rem;border:1.5px solid var(--border);cursor:pointer;text-decoration:none;display:block;text-align:center;transition:border-color .2s,color .2s}
+.btn-cancel:hover{border-color:var(--dark);color:var(--dark)}
+.alert{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:10px 14px;font-size:.85rem;margin-bottom:20px}
+@media(max-width:640px){.layout{grid-template-columns:1fr}}
+footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="nav-logo" href="/rooms"><span>Elite</span> Stays</a>
+    <a class="nav-back" href="/rooms">&#8592; Back to Rooms</a>
+  </div>
+</header>
+<main>
+  <div class="page-tag">Step 1 of 1</div>
+  <div class="page-title">Complete Your Reservation</div>
+  <div class="alert" th:if="${error}" th:text="${error}"></div>
+  <div class="layout">
+    <!-- Room summary -->
+    <div class="card">
+      <div class="card-title">Room Details</div>
+      <div class="room-preview">
+        <img th:src="${#strings.containsIgnoreCase(room.roomType,'penthouse')} ? 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80' :
+                    (${#strings.containsIgnoreCase(room.roomType,'villa')} ? 'https://images.unsplash.com/photo-1613490908592-fd53b1b9195b?w=600&q=80' :
+                    (${#strings.containsIgnoreCase(room.roomType,'suite')} ? 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80' :
+                    (${#strings.containsIgnoreCase(room.roomType,'deluxe')} ? 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600&q=80' :
+                    'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=600&q=80')))" alt="">
+      </div>
+      <div class="room-detail-item"><span class="label">Room Type</span><span class="value" th:text="${room.roomType}"></span></div>
+      <div class="room-detail-item"><span class="label">Room Number</span><span class="value" th:text="${room.roomNumber}"></span></div>
+      <div class="room-detail-item"><span class="label">Rate per Night</span><span class="value" th:text="'₹ ' + ${room.price}"></span></div>
+    </div>
+    <!-- Booking form -->
+    <div class="card">
+      <div class="card-title">Select Dates</div>
+      <form th:action="@{/book/confirm}" method="post">
+        <input type="hidden" name="roomId" th:value="${room.id}">
+        <div class="form-group">
+          <label class="form-label">Check-In Date</label>
+          <input type="text" id="checkIn" name="checkIn" class="form-input" placeholder="Select date" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Check-Out Date</label>
+          <input type="text" id="checkOut" name="checkOut" class="form-input" placeholder="Select date" required>
+        </div>
+        <div class="summary-box">
+          <div class="nights"><span class="nights">Duration</span><strong id="nightsDisplay">— nights</strong></div>
+          <div><div class="total-label">Total</div><div class="total-price" id="priceDisplay">₹ 0</div></div>
+        </div>
+        <button type="submit" class="btn-confirm">Confirm Booking</button>
+        <a href="/rooms" class="btn-cancel">Cancel</a>
+      </form>
+    </div>
+  </div>
+</main>
+<footer>&copy; 2024 Elite Stays</footer>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script th:inline="javascript">
+const ppn=/*[[${room.price}]]*/0;
+function calc(){
+  const i=document.getElementById('checkIn').value,o=document.getElementById('checkOut').value;
+  if(i&&o){const d=Math.ceil((new Date(o)-new Date(i))/86400000);
+    if(d>0){document.getElementById('nightsDisplay').textContent=d+' night'+(d>1?'s':'');
+      document.getElementById('priceDisplay').textContent='₹ '+(d*ppn);return;}}
+  document.getElementById('nightsDisplay').textContent='— nights';
+  document.getElementById('priceDisplay').textContent='₹ 0';}
+const fpIn=flatpickr('#checkIn',{minDate:'today',dateFormat:'Y-m-d',onChange(d){if(d[0])fpOut.set('minDate',new Date(d[0].getTime()+86400000));calc();}});
+const fpOut=flatpickr('#checkOut',{minDate:new Date(Date.now()+86400000),dateFormat:'Y-m-d',onChange:calc});
+</script>
+</body>
+</html>

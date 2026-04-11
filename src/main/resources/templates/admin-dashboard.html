@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Dashboard — Elite Stays</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F4F0;--white:#FFFFFF;--dark:#1A1A1A;--gold:#A8832A;--border:#E5DFD7;--muted:#7A7166;--text:#2D2A26;--sidebar:#1C1C1C;--font-h:'Cormorant Garamond',Georgia,serif;--font-b:'Outfit',sans-serif}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--sidebar);flex-shrink:0;display:flex;flex-direction:column;padding:0}
+.sidebar-logo{padding:22px 24px;border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--font-h);font-size:1.3rem;color:#fff;text-decoration:none;letter-spacing:.05em}
+.sidebar-logo span{color:var(--gold);font-style:italic}
+.sidebar-label{font-size:.6rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:20px 24px 8px}
+.sidebar-nav{flex:1}
+.sidebar-link{display:block;padding:11px 24px;font-size:.85rem;color:rgba(255,255,255,.65);text-decoration:none;border-left:3px solid transparent;transition:all .2s}
+.sidebar-link:hover,.sidebar-link.active{background:rgba(255,255,255,.05);color:#fff;border-left-color:var(--gold)}
+.sidebar-link.active{color:var(--gold)}
+.sidebar-foot{padding:20px 24px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-foot a{display:block;padding:9px 0;font-size:.8rem;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s}
+.sidebar-foot a:hover{color:#fff}
+.main{flex:1;overflow-y:auto;padding:36px 40px}
+.page-tag{font-size:.65rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.page-title{font-family:var(--font-h);font-size:2.4rem;font-weight:400;color:var(--dark);margin-bottom:4px}
+.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:36px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px}
+.stat-card{background:var(--white);border:1px solid var(--border);padding:22px 24px}
+.stat-label{font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat-value{font-family:var(--font-h);font-size:2.4rem;font-weight:600;color:var(--dark);line-height:1}
+.stat-value.gold{color:var(--gold)}
+.quick-links{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.quick-card{background:var(--white);border:1px solid var(--border);padding:24px;text-decoration:none;color:var(--text);transition:box-shadow .2s,border-color .2s;display:block}
+.quick-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.08);border-color:var(--gold)}
+.quick-icon{width:40px;height:40px;background:var(--bg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.2rem;color:var(--gold)}
+.quick-title{font-family:var(--font-h);font-size:1.2rem;font-weight:600;color:var(--dark);margin-bottom:4px}
+.quick-sub{font-size:.8rem;color:var(--muted)}
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.quick-links{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <a class="sidebar-logo" href="/rooms"><span>Elite</span> Stays</a>
+  <div class="sidebar-label">Admin Panel</div>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard" class="sidebar-link active">&#9632; Dashboard</a>
+    <a href="/admin/suites"    class="sidebar-link">&#9633; Manage Rooms</a>
+    <a href="/admin/bookings"  class="sidebar-link">&#9633; All Bookings</a>
+    <a href="/admin/guests"    class="sidebar-link">&#9633; Users &amp; Staff</a>
+  </nav>
+  <div class="sidebar-foot">
+    <a href="/rooms">&#8592; Guest View</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+<div class="main">
+  <div class="page-tag">Admin</div>
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Welcome back, <span th:text="${session.loggedInUser.name}">Admin</span></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total Rooms</div><div class="stat-value gold" th:text="${totalRooms}">0</div></div>
+    <div class="stat-card"><div class="stat-label">Total Bookings</div><div class="stat-value" th:text="${totalBookings}">0</div></div>
+    <div class="stat-card"><div class="stat-label">Registered Guests</div><div class="stat-value" th:text="${totalGuests}">0</div></div>
+    <div class="stat-card"><div class="stat-label">Staff Members</div><div class="stat-value" th:text="${staffCount}">0</div></div>
+  </div>
+  <div class="quick-links">
+    <a href="/admin/suites" class="quick-card"><div class="quick-icon">&#9633;</div><div class="quick-title">Manage Rooms</div><div class="quick-sub">Add, remove, or update room status.</div></a>
+    <a href="/admin/bookings" class="quick-card"><div class="quick-icon">&#9632;</div><div class="quick-title">All Bookings</div><div class="quick-sub">View and manage all reservations.</div></a>
+    <a href="/admin/guests" class="quick-card"><div class="quick-icon">&#9651;</div><div class="quick-title">Users &amp; Staff</div><div class="quick-sub">View guests and create staff accounts.</div></a>
+  </div>
+</div>
+</body>
+</html>

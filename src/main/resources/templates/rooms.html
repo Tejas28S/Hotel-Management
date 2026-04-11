@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elite Stays — Rooms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F4F0;--white:#FFFFFF;--dark:#1A1A1A;--gold:#A8832A;--gold-light:#C9A84C;
+  --border:#E5DFD7;--muted:#7A7166;--text:#2D2A26;
+  --font-h:'Cormorant Garamond',Georgia,serif;--font-b:'Outfit',sans-serif;
+  --shadow:0 2px 24px rgba(0,0,0,0.08);--shadow-lg:0 8px 40px rgba(0,0,0,0.12);
+}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);line-height:1.6}
+
+/* NAV */
+header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 12px rgba(0,0,0,0.06)}
+.nav{max-width:1200px;margin:0 auto;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--font-h);font-size:1.55rem;color:var(--dark);text-decoration:none;letter-spacing:0.05em}
+.nav-logo span{color:var(--gold);font-style:italic}
+.nav-links{display:flex;align-items:center;gap:12px}
+.nav-user{font-size:.85rem;color:var(--muted);margin-right:4px}
+.nav-user strong{color:var(--gold);font-family:var(--font-h);font-size:1rem;font-style:italic}
+.btn{display:inline-block;padding:9px 22px;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;border:none;cursor:pointer;transition:all .2s}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--dark)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-light)}
+.btn-sm{padding:7px 16px;font-size:.75rem}
+
+/* HERO */
+.hero{position:relative;height:480px;overflow:hidden;display:flex;align-items:flex-end}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.55)}
+.hero-content{position:relative;z-index:2;max-width:1200px;width:100%;margin:0 auto;padding:0 32px 52px}
+.hero-tag{font-size:.7rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:10px}
+.hero-title{font-family:var(--font-h);font-size:clamp(2.4rem,5vw,3.8rem);font-weight:400;color:#fff;line-height:1.1;margin-bottom:8px}
+.hero-title em{font-style:italic;color:#DFC98A}
+.hero-sub{font-size:.9rem;color:rgba(255,255,255,.65);font-weight:300}
+
+/* SEARCH BAR */
+.search-section{background:var(--white);border-bottom:1px solid var(--border);padding:0}
+.search-bar{max-width:1200px;margin:0 auto;padding:20px 32px;display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.search-field{flex:1;min-width:180px}
+.search-label{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+.search-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font-b);font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--gold)}
+.search-btn{padding:11px 32px;background:var(--dark);color:#fff;font-family:var(--font-b);font-size:.8rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;white-space:nowrap;transition:background .2s}
+.search-btn:hover{background:#333}
+
+/* PAGE BODY */
+.page-body{max-width:1200px;margin:0 auto;padding:40px 32px 80px}
+.section-title{font-family:var(--font-h);font-size:1.9rem;font-weight:400;color:var(--dark);margin-bottom:6px}
+.section-sub{font-size:.88rem;color:var(--muted);margin-bottom:32px}
+.section-line{display:flex;align-items:center;gap:16px;margin-bottom:32px}
+.section-line::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ROOM GRID */
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px}
+
+/* ROOM CARD */
+.room-card{background:var(--white);border:1px solid var(--border);overflow:hidden;transition:box-shadow .3s,transform .3s;cursor:pointer}
+.room-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.room-card-img{width:100%;height:240px;object-fit:cover;display:block;transition:transform .5s}
+.room-card:hover .room-card-img{transform:scale(1.04)}
+.room-card-img-wrap{overflow:hidden;position:relative}
+.room-badge{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.92);padding:4px 12px;font-size:.72rem;font-weight:500;letter-spacing:.08em;color:var(--dark)}
+.room-card-body{padding:20px 22px 22px}
+.room-type{font-family:var(--font-h);font-size:1.4rem;font-weight:600;color:var(--dark);margin-bottom:4px}
+.room-no{font-size:.75rem;color:var(--muted);margin-bottom:14px;letter-spacing:.05em}
+.room-features{display:flex;gap:18px;margin-bottom:16px}
+.room-feat{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:5px}
+.room-feat svg{flex-shrink:0;opacity:.6}
+.room-divider{height:1px;background:var(--border);margin-bottom:16px}
+.room-footer{display:flex;align-items:center;justify-content:space-between}
+.room-price{font-family:var(--font-h);font-size:1.6rem;font-weight:600;color:var(--gold)}
+.room-price-note{font-size:.7rem;color:var(--muted);margin-top:1px}
+.btn-room{background:var(--dark);color:#fff;padding:9px 20px;font-size:.75rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:background .2s}
+.btn-room:hover{background:var(--gold);color:#fff}
+
+/* EMPTY */
+.empty{text-align:center;padding:80px 20px;grid-column:1/-1}
+.empty p{color:var(--muted);margin:10px 0 24px;font-size:.95rem}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--white);max-width:820px;width:100%;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+.modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;background:var(--bg);border:1px solid var(--border);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:10;transition:color .2s}
+.modal-close:hover{color:var(--dark)}
+.modal-imgs{width:100%;height:300px;object-fit:cover;display:block}
+.modal-body{padding:28px 32px 32px}
+.modal-tag{font-size:.65rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.modal-name{font-family:var(--font-h);font-size:2.1rem;font-weight:400;color:var(--dark);margin-bottom:4px}
+.modal-num{font-size:.8rem;color:var(--muted);margin-bottom:16px}
+.modal-desc{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:24px;font-weight:300}
+.amenities-title{font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--dark);margin-bottom:14px}
+.amenities-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px}
+.amenity{background:var(--bg);border:1px solid var(--border);padding:12px;text-align:center;font-size:.75rem;color:var(--muted);font-weight:400}
+.amenity strong{display:block;font-size:.8rem;color:var(--dark);margin-bottom:2px;font-weight:500}
+.modal-footer-row{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:22px}
+.modal-price-wrap .label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.modal-price-wrap .price{font-family:var(--font-h);font-size:2rem;font-weight:600;color:var(--gold)}
+.btn-reserve{background:var(--gold);color:#fff;padding:14px 32px;font-size:.82rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:background .2s}
+.btn-reserve:hover{background:var(--dark);color:#fff}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 32px;text-align:center;font-size:.8rem;color:var(--muted)}
+footer strong{color:var(--dark);font-family:var(--font-h);font-size:1rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header>
+  <div class="nav">
+    <a class="nav-logo" href="/rooms"><span>Elite</span> Stays</a>
+    <div class="nav-links">
+      <div th:if="${session.loggedInUser == null}">
+        <a href="/login"  class="btn btn-outline btn-sm me-1">Sign In</a>
+        <a href="/register" class="btn btn-gold btn-sm">Register</a>
+      </div>
+      <div th:if="${session.loggedInUser != null}" style="display:flex;align-items:center;gap:10px;">
+        <span class="nav-user">Hi, <strong th:text="${session.loggedInUser.name}">Guest</strong></span>
+        <a href="/my-bookings" class="btn btn-outline btn-sm">My Bookings</a>
+        <a href="/staff/dashboard" th:if="${session.loggedInUser.role=='STAFF' or session.loggedInUser.role=='ADMIN'}" class="btn btn-outline btn-sm">Staff</a>
+        <a href="/admin/dashboard" th:if="${session.loggedInUser.role=='ADMIN'}" class="btn btn-outline btn-sm">Admin</a>
+        <a href="/logout" class="btn btn-gold btn-sm">Logout</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="hero-img" src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=1600&q=80" alt="">
+  <div class="hero-content">
+    <div class="hero-tag">Private Collection · Elite Stays</div>
+    <h1 class="hero-title">Handcrafted Stays for the<br><em>Discerning Traveller</em></h1>
+    <p class="hero-sub">Browse our curated collection of suites, villas and penthouses.</p>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <form class="search-bar" th:action="@{/rooms}" method="get">
+    <div class="search-field">
+      <label class="search-label">Check-In</label>
+      <input type="text" id="ciInput" name="checkIn" class="search-input" placeholder="Select date" th:value="${searchCheckIn}" autocomplete="off">
+    </div>
+    <div class="search-field">
+      <label class="search-label">Check-Out</label>
+      <input type="text" id="coInput" name="checkOut" class="search-input" placeholder="Select date" th:value="${searchCheckOut}" autocomplete="off">
+    </div>
+    <button type="submit" class="search-btn">Check Availability</button>
+  </form>
+</div>
+
+<!-- ROOMS -->
+<div class="page-body">
+  <div class="section-line">
+    <div>
+      <div class="section-title">Available Rooms</div>
+      <div class="section-sub">Select a suite to view details and reserve</div>
+    </div>
+  </div>
+
+  <div class="rooms-grid">
+    <!-- Empty -->
+    <div class="empty" th:if="${#lists.isEmpty(availableRooms)}">
+      <svg width="48" height="48" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <p>No rooms match your dates. Try different dates or clear the search.</p>
+      <a href="/rooms" class="btn btn-gold">Clear Search</a>
+    </div>
+
+    <!-- Room card -->
+    <div class="room-card" th:each="room : ${availableRooms}" th:onclick="'openModal(' + ${room.id} + ')'">
+      <div class="room-card-img-wrap">
+        <!-- Smart image: different per type -->
+        <img class="room-card-img" alt=""
+          th:src="${#strings.containsIgnoreCase(room.roomType,'penthouse')} ? 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80' :
+                  (${#strings.containsIgnoreCase(room.roomType,'villa')} ? 'https://images.unsplash.com/photo-1613490908592-fd53b1b9195b?w=700&q=80' :
+                  (${#strings.containsIgnoreCase(room.roomType,'suite')} ? 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=700&q=80' :
+                  (${#strings.containsIgnoreCase(room.roomType,'deluxe')} ? 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=700&q=80' :
+                  (${#strings.containsIgnoreCase(room.roomType,'standard')} ? 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=700&q=80' :
+                  ${room.imageUrl}))))"
+          onerror="this.src='https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=700&q=80'">
+        <div class="room-badge">Room <span th:text="${room.roomNumber}"></span></div>
+      </div>
+      <div class="room-card-body">
+        <div class="room-type" th:text="${room.roomType}">Suite</div>
+        <div class="room-no">Room No. <span th:text="${room.roomNumber}"></span></div>
+        <div class="room-features">
+          <div class="room-feat">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span th:if="${#strings.containsIgnoreCase(room.roomType,'villa')}">Up to 6 guests</span>
+            <span th:if="${#strings.containsIgnoreCase(room.roomType,'penthouse')}">Up to 4 guests</span>
+            <span th:if="${!#strings.containsIgnoreCase(room.roomType,'villa') and !#strings.containsIgnoreCase(room.roomType,'penthouse')}">Up to 2 guests</span>
+          </div>
+          <div class="room-feat">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H7v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10h3.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+            En-suite bath
+          </div>
+        </div>
+        <div class="room-divider"></div>
+        <div class="room-footer">
+          <div>
+            <div class="room-price">&#8377;<span th:text="${room.price}"></span></div>
+            <div class="room-price-note">per night</div>
+          </div>
+          <span class="btn-room">View Details</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div th:each="room : ${availableRooms}">
+  <div class="modal-overlay" th:id="'modal-' + ${room.id}" onclick="if(event.target===this)closeModal(this.id)">
+    <div class="modal-box">
+      <button class="modal-close" th:onclick="'closeModal(\'modal-' + ${room.id} + '\')'">&#10005;</button>
+      <img class="modal-imgs" alt=""
+        th:src="${#strings.containsIgnoreCase(room.roomType,'penthouse')} ? 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=900&q=85' :
+                (${#strings.containsIgnoreCase(room.roomType,'villa')} ? 'https://images.unsplash.com/photo-1613490908592-fd53b1b9195b?w=900&q=85' :
+                (${#strings.containsIgnoreCase(room.roomType,'suite')} ? 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=900&q=85' :
+                (${#strings.containsIgnoreCase(room.roomType,'deluxe')} ? 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=900&q=85' :
+                (${#strings.containsIgnoreCase(room.roomType,'standard')} ? 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=900&q=85' :
+                ${room.imageUrl}))))">
+      <div class="modal-body">
+        <div class="modal-tag">Elite Stays · Private Collection</div>
+        <div class="modal-name" th:text="${room.roomType}">Suite</div>
+        <div class="modal-num">Room No. <span th:text="${room.roomNumber}"></span></div>
+        <p class="modal-desc" th:if="${#strings.containsIgnoreCase(room.roomType,'penthouse')}">The Skyline Penthouse commands the building's crown — panoramic views, a wraparound terrace, dedicated butler service, and a master bath with freestanding jacuzzi. A residence above the rest.</p>
+        <p class="modal-desc" th:if="${#strings.containsIgnoreCase(room.roomType,'villa')}">Your own private world. The Oceanfront Villa features an infinity pool, direct beach access, al fresco dining, and an outdoor rain shower surrounded by tropical gardens.</p>
+        <p class="modal-desc" th:if="${!#strings.containsIgnoreCase(room.roomType,'penthouse') and !#strings.containsIgnoreCase(room.roomType,'villa')}">Refined and restful. Floor-to-ceiling windows, premium bedding, a rainfall shower, and bespoke furnishings — every detail curated for your comfort.</p>
+        <div class="amenities-title">What's Included</div>
+        <div class="amenities-list" th:if="${#strings.containsIgnoreCase(room.roomType,'penthouse')}">
+          <div class="amenity"><strong>Butler</strong>24/7 Service</div>
+          <div class="amenity"><strong>Chauffeur</strong>On Request</div>
+          <div class="amenity"><strong>Jacuzzi</strong>Private</div>
+          <div class="amenity"><strong>Panorama</strong>360° Views</div>
+          <div class="amenity"><strong>Premium Bar</strong>Stocked</div>
+          <div class="amenity"><strong>Safe</strong>In-Room Vault</div>
+        </div>
+        <div class="amenities-list" th:if="${#strings.containsIgnoreCase(room.roomType,'villa')}">
+          <div class="amenity"><strong>Private Pool</strong>Infinity</div>
+          <div class="amenity"><strong>Beach Access</strong>Direct</div>
+          <div class="amenity"><strong>Chef Service</strong>On Request</div>
+          <div class="amenity"><strong>Open Air</strong>Terrace</div>
+          <div class="amenity"><strong>Bicycles</strong>Complimentary</div>
+          <div class="amenity"><strong>BBQ Grill</strong>Private</div>
+        </div>
+        <div class="amenities-list" th:if="${!#strings.containsIgnoreCase(room.roomType,'penthouse') and !#strings.containsIgnoreCase(room.roomType,'villa')}">
+          <div class="amenity"><strong>Wi-Fi</strong>High-Speed</div>
+          <div class="amenity"><strong>Room Service</strong>24/7</div>
+          <div class="amenity"><strong>Smart TV</strong>55"</div>
+          <div class="amenity"><strong>Climate</strong>A/C & Heating</div>
+          <div class="amenity"><strong>Safe</strong>Digital</div>
+          <div class="amenity"><strong>Mini Bar</strong>Stocked</div>
+        </div>
+        <div class="modal-footer-row">
+          <div class="modal-price-wrap">
+            <div class="label">From per night</div>
+            <div class="price">&#8377;<span th:text="${room.price}"></span></div>
+          </div>
+          <a th:href="@{/book/{id}(id=${room.id})}" class="btn-reserve">Reserve This Room</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>Elite Stays</strong> &nbsp;&middot;&nbsp; &copy; 2024 All rights reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+function openModal(id){document.getElementById('modal-'+id).classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow=''}
+const ci=flatpickr('#ciInput',{minDate:'today',dateFormat:'Y-m-d',onChange(d){if(d[0])co.set('minDate',new Date(d[0].getTime()+86400000))}});
+const co=flatpickr('#coInput',{minDate:new Date(Date.now()+86400000),dateFormat:'Y-m-d'});
+</script>
+</body>
+</html>

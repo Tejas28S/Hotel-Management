@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Booking Confirmed — Elite Stays</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F4F0;--white:#FFFFFF;--dark:#1A1A1A;--gold:#A8832A;--border:#E5DFD7;--muted:#7A7166;--text:#2D2A26;--green:#16a34a;--font-h:'Cormorant Garamond',Georgia,serif;--font-b:'Outfit',sans-serif}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:68px;display:flex;align-items:center;justify-content:center}
+.nav-logo{font-family:var(--font-h);font-size:1.55rem;color:var(--dark);text-decoration:none}
+.nav-logo span{color:var(--gold);font-style:italic}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
+.ticket{background:var(--white);border:1px solid var(--border);max-width:460px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,.08);overflow:hidden}
+.ticket-top{background:var(--gold);padding:28px 32px;text-align:center}
+.check-icon{width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;color:#fff}
+.ticket-top h1{font-family:var(--font-h);font-size:1.9rem;font-weight:400;color:#fff;margin-bottom:4px}
+.ticket-top p{font-size:.85rem;color:rgba(255,255,255,.8)}
+.ticket-body{padding:28px 32px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:.88rem}
+.detail-row:last-of-type{border-bottom:none}
+.detail-row .lbl{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.detail-row .val{font-weight:500;color:var(--dark);text-align:right}
+.ticket-total{background:var(--bg);margin:16px 0;padding:16px;display:flex;justify-content:space-between;align-items:center}
+.ticket-total .tl{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.ticket-total .tp{font-family:var(--font-h);font-size:2rem;font-weight:600;color:var(--gold)}
+.btn-primary{display:block;width:100%;padding:13px;background:var(--dark);color:#fff;font-family:var(--font-b);font-size:.85rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;text-align:center;margin-bottom:10px;transition:background .2s}
+.btn-primary:hover{background:var(--gold)}
+.btn-secondary{display:block;width:100%;padding:11px;background:transparent;color:var(--muted);font-family:var(--font-b);font-size:.83rem;border:1.5px solid var(--border);text-decoration:none;text-align:center;transition:border-color .2s,color .2s}
+.btn-secondary:hover{border-color:var(--dark);color:var(--dark)}
+footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header><a class="nav-logo" href="/rooms"><span>Elite</span> Stays</a></header>
+<main>
+  <div class="ticket">
+    <div class="ticket-top">
+      <div class="check-icon">&#10003;</div>
+      <h1>Reservation Confirmed</h1>
+      <p>Thank you for choosing Elite Stays.</p>
+    </div>
+    <div class="ticket-body">
+      <div class="detail-row"><span class="lbl">Guest</span><span class="val" th:text="${booking.guest.name}"></span></div>
+      <div class="detail-row"><span class="lbl">Room</span><span class="val" th:text="${booking.room.roomType} + ' · Room ' + ${booking.room.roomNumber}"></span></div>
+      <div class="detail-row"><span class="lbl">Check-In</span><span class="val" th:text="${booking.checkInDate}"></span></div>
+      <div class="detail-row"><span class="lbl">Check-Out</span><span class="val" th:text="${booking.checkOutDate}"></span></div>
+      <div class="detail-row"><span class="lbl">Status</span><span class="val" style="color:var(--green)">&#10003; Confirmed</span></div>
+      <div class="ticket-total">
+        <span class="tl">Total Charged</span>
+        <span class="tp">&#8377;<span th:text="${booking.totalPrice}"></span></span>
+      </div>
+      <a href="/my-bookings" class="btn-primary">View My Bookings</a>
+      <a href="/rooms" class="btn-secondary">Back to Rooms</a>
+    </div>
+  </div>
+</main>
+<footer>&copy; 2024 Elite Stays</footer>
+</body>
+</html>

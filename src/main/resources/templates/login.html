@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign In — Elite Stays</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F4F0;--white:#FFFFFF;--dark:#1A1A1A;--gold:#A8832A;--gold-light:#C9A84C;--border:#E5DFD7;--muted:#7A7166;--text:#2D2A26;--font-h:'Cormorant Garamond',Georgia,serif;--font-b:'Outfit',sans-serif}
+body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:68px;display:flex;align-items:center;justify-content:center}
+.nav-logo{font-family:var(--font-h);font-size:1.55rem;color:var(--dark);text-decoration:none;letter-spacing:0.05em}
+.nav-logo span{color:var(--gold);font-style:italic}
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
+.auth-card{background:var(--white);border:1px solid var(--border);width:100%;max-width:420px;padding:44px 40px;box-shadow:0 4px 32px rgba(0,0,0,.07)}
+.auth-tag{font-size:.65rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.auth-title{font-family:var(--font-h);font-size:2.2rem;font-weight:400;color:var(--dark);margin-bottom:4px}
+.auth-sub{font-size:.85rem;color:var(--muted);margin-bottom:32px;font-weight:300}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font-b);font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--gold)}
+.btn-submit{width:100%;padding:14px;background:var(--dark);color:#fff;font-family:var(--font-b);font-size:.85rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;margin-top:8px;transition:background .2s}
+.btn-submit:hover{background:var(--gold)}
+.auth-footer{text-align:center;margin-top:24px;font-size:.83rem;color:var(--muted)}
+.auth-footer a{color:var(--gold);text-decoration:none;font-weight:500}
+.auth-footer a:hover{text-decoration:underline}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.alert{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:10px 14px;font-size:.85rem;margin-bottom:20px}
+footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header><a class="nav-logo" href="/rooms"><span>Elite</span> Stays</a></header>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-tag">Welcome Back</div>
+    <h1 class="auth-title">Sign In</h1>
+    <p class="auth-sub">Access your reservations and account details.</p>
+    <div class="alert" th:if="${error}" th:text="${error}"></div>
+    <form th:action="@{/login}" method="post">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="Your password" required>
+      </div>
+      <button type="submit" class="btn-submit">Sign In</button>
+    </form>
+    <div class="divider"></div>
+    <div class="auth-footer">
+      Don't have an account? <a href="/register">Create one here</a><br><br>
+      <a href="/rooms" style="color:var(--muted)">&#8592; Back to Rooms</a>
+    </div>
+  </div>
+</div>
+<footer>&copy; 2024 Elite Stays</footer>
+</body>
+</html>
