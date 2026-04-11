@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+target/
+*.class
+application.properties
+.idea/
+*.iml
