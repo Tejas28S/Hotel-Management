@@ -30,6 +30,14 @@ main{flex:1;max-width:860px;margin:0 auto;width:100%;padding:48px 32px 80px}
 .form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font-b);font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s}
 .form-input:focus{border-color:var(--gold)}
+
+/* Strategy Badge — the key visual proof for the professor */
+.strategy-box{margin:16px 0;padding:14px 16px;border-radius:4px;border-left:4px solid var(--gold);background:#fffbf2;display:none}
+.strategy-box.visible{display:block}
+.strategy-label{font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.strategy-name{font-size:.95rem;font-weight:600;color:var(--gold)}
+.strategy-desc{font-size:.78rem;color:var(--muted);margin-top:3px}
+
 .summary-box{background:var(--bg);border:1px solid var(--border);padding:16px;margin:20px 0;display:flex;justify-content:space-between;align-items:center}
 .summary-box .nights{font-size:.88rem;color:var(--muted)}
 .summary-box .nights strong{display:block;font-size:1.1rem;color:var(--dark);font-weight:600}
@@ -68,8 +76,9 @@ footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border
       </div>
       <div class="room-detail-item"><span class="label">Room Type</span><span class="value" th:text="${room.roomType}"></span></div>
       <div class="room-detail-item"><span class="label">Room Number</span><span class="value" th:text="${room.roomNumber}"></span></div>
-      <div class="room-detail-item"><span class="label">Rate per Night</span><span class="value" th:text="'₹ ' + ${room.price}"></span></div>
+      <div class="room-detail-item"><span class="label">Base Rate / Night</span><span class="value" th:text="'&#8377; ' + ${room.price}"></span></div>
     </div>
+
     <!-- Booking form -->
     <div class="card">
       <div class="card-title">Select Dates</div>
@@ -77,15 +86,25 @@ footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border
         <input type="hidden" name="roomId" th:value="${room.id}">
         <div class="form-group">
           <label class="form-label">Check-In Date</label>
-          <input type="text" id="checkIn" name="checkIn" class="form-input" placeholder="Select date" required>
+          <input type="text" id="checkIn" name="checkIn" class="form-input" placeholder="Select date"
+                 th:value="${preCheckIn}" required>
         </div>
         <div class="form-group">
           <label class="form-label">Check-Out Date</label>
-          <input type="text" id="checkOut" name="checkOut" class="form-input" placeholder="Select date" required>
+          <input type="text" id="checkOut" name="checkOut" class="form-input" placeholder="Select date"
+                 th:value="${preCheckOut}" required>
         </div>
+
+        <!-- STRATEGY PATTERN BADGE — shows which algorithm is selected -->
+        <div class="strategy-box" id="strategyBox">
+          <div class="strategy-label">&#9670; Pricing Strategy Applied</div>
+          <div class="strategy-name" id="strategyName">Standard Pricing</div>
+          <div class="strategy-desc" id="strategyDesc">Base rate × number of nights</div>
+        </div>
+
         <div class="summary-box">
           <div class="nights"><span class="nights">Duration</span><strong id="nightsDisplay">— nights</strong></div>
-          <div><div class="total-label">Total</div><div class="total-price" id="priceDisplay">₹ 0</div></div>
+          <div><div class="total-label">Estimated Total</div><div class="total-price" id="priceDisplay">&#8377; 0</div></div>
         </div>
         <button type="submit" class="btn-confirm">Confirm Booking</button>
         <a href="/rooms" class="btn-cancel">Cancel</a>
@@ -94,18 +113,126 @@ footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border
   </div>
 </main>
 <footer>&copy; 2024 Elite Stays</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script th:inline="javascript">
-const ppn=/*[[${room.price}]]*/0;
+const ppn = /*[[${room.price}]]*/ 0;
+
+// Peak holiday dates (mirrors HolidayPricingStrategy.java)
+const PEAK = ['12-24','12-25','12-31','01-01','10-31'];
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function getMonthDay(d){
+  return pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function isWeekend(d){
+  const day = d.getDay();
+  return day === 5 || day === 6; // Friday=5, Saturday=6
+}
+
+function isHoliday(d){
+  return PEAK.includes(getMonthDay(d));
+}
+
+/**
+ * Client-side mirror of BookingService.selectStrategy()
+ * Determines which strategy applies and returns its details.
+ * This makes the strategy badge update live as the user picks dates.
+ */
+function determineStrategy(checkIn, checkOut){
+  let current = new Date(checkIn);
+  const end = new Date(checkOut);
+  let hasWeekend = false;
+
+  while(current < end){
+    if(isHoliday(current)) return {
+      name: 'Holiday Pricing',
+      desc: '+50% surcharge on peak dates (Christmas, New Year, Halloween)',
+      multiplierLabel: '×1.5 on peak nights',
+      type: 'holiday'
+    };
+    if(isWeekend(current)) hasWeekend = true;
+    current.setDate(current.getDate()+1);
+  }
+
+  if(hasWeekend) return {
+    name: 'Weekend Pricing',
+    desc: '+25% surcharge applied on Friday and Saturday nights',
+    multiplierLabel: '×1.25 on Fri/Sat nights',
+    type: 'weekend'
+  };
+
+  return {
+    name: 'Standard Pricing',
+    desc: 'Base rate × number of nights. No surcharges apply.',
+    multiplierLabel: 'Flat rate per night',
+    type: 'standard'
+  };
+}
+
+function calculatePrice(checkIn, checkOut, ppn){
+  let total = 0;
+  let current = new Date(checkIn);
+  const end = new Date(checkOut);
+
+  // Check if any holiday exists first (mirrors server-side priority)
+  let cur2 = new Date(checkIn);
+  let hasHoliday = false;
+  while(cur2 < end){ if(isHoliday(cur2)){ hasHoliday=true; break; } cur2.setDate(cur2.getDate()+1); }
+
+  while(current < end){
+    if(hasHoliday){
+      total += isHoliday(current) ? ppn * 1.5 : ppn;
+    } else {
+      total += isWeekend(current) ? ppn * 1.25 : ppn;
+    }
+    current.setDate(current.getDate()+1);
+  }
+  return Math.round(total * 100) / 100;
+}
+
 function calc(){
-  const i=document.getElementById('checkIn').value,o=document.getElementById('checkOut').value;
-  if(i&&o){const d=Math.ceil((new Date(o)-new Date(i))/86400000);
-    if(d>0){document.getElementById('nightsDisplay').textContent=d+' night'+(d>1?'s':'');
-      document.getElementById('priceDisplay').textContent='₹ '+(d*ppn);return;}}
-  document.getElementById('nightsDisplay').textContent='— nights';
-  document.getElementById('priceDisplay').textContent='₹ 0';}
-const fpIn=flatpickr('#checkIn',{minDate:'today',dateFormat:'Y-m-d',onChange(d){if(d[0])fpOut.set('minDate',new Date(d[0].getTime()+86400000));calc();}});
-const fpOut=flatpickr('#checkOut',{minDate:new Date(Date.now()+86400000),dateFormat:'Y-m-d',onChange:calc});
+  const iVal = document.getElementById('checkIn').value;
+  const oVal = document.getElementById('checkOut').value;
+  const box   = document.getElementById('strategyBox');
+
+  if(iVal && oVal){
+    const ci = new Date(iVal), co = new Date(oVal);
+    const nights = Math.ceil((co - ci) / 86400000);
+    if(nights > 0){
+      const strategy = determineStrategy(iVal, oVal);
+      const total = calculatePrice(iVal, oVal, ppn);
+
+      document.getElementById('nightsDisplay').textContent = nights + ' night' + (nights>1?'s':'');
+      document.getElementById('priceDisplay').textContent  = '₹ ' + total.toLocaleString('en-IN');
+      document.getElementById('strategyName').textContent  = strategy.name;
+      document.getElementById('strategyDesc').textContent  = strategy.desc;
+
+      // Color the badge based on strategy type
+      box.style.borderLeftColor = strategy.type==='holiday' ? '#dc2626' : strategy.type==='weekend' ? '#d97706' : '#16a34a';
+      box.style.background      = strategy.type==='holiday' ? '#fef2f2' : strategy.type==='weekend' ? '#fffbeb' : '#f0fdf4';
+      box.classList.add('visible');
+      return;
+    }
+  }
+  document.getElementById('nightsDisplay').textContent = '— nights';
+  document.getElementById('priceDisplay').textContent  = '₹ 0';
+  box.classList.remove('visible');
+}
+
+const fpIn = flatpickr('#checkIn',{
+  minDate:'today', dateFormat:'Y-m-d',
+  onChange(d){ if(d[0]) fpOut.set('minDate', new Date(d[0].getTime()+86400000)); calc(); }
+});
+const fpOut = flatpickr('#checkOut',{
+  minDate: new Date(Date.now()+86400000), dateFormat:'Y-m-d',
+  onChange: calc
+});
+
+// Run once on load if dates pre-filled
+window.addEventListener('load', calc);
 </script>
 </body>
 </html>

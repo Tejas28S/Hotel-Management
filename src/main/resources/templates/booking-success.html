@@ -12,7 +12,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 3
 .nav-logo{font-family:var(--font-h);font-size:1.55rem;color:var(--dark);text-decoration:none}
 .nav-logo span{color:var(--gold);font-style:italic}
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
-.ticket{background:var(--white);border:1px solid var(--border);max-width:460px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,.08);overflow:hidden}
+.ticket{background:var(--white);border:1px solid var(--border);max-width:480px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,.08);overflow:hidden}
 .ticket-top{background:var(--gold);padding:28px 32px;text-align:center}
 .check-icon{width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;color:#fff}
 .ticket-top h1{font-family:var(--font-h);font-size:1.9rem;font-weight:400;color:#fff;margin-bottom:4px}
@@ -22,6 +22,12 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 
 .detail-row:last-of-type{border-bottom:none}
 .detail-row .lbl{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
 .detail-row .val{font-weight:500;color:var(--dark);text-align:right}
+
+/* Strategy row — highlighted so professor sees it clearly */
+.strategy-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin:10px 0;background:#fffbf2;border-left:4px solid var(--gold);font-size:.88rem}
+.strategy-row .lbl{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+.strategy-row .val{font-weight:600;color:var(--gold);text-align:right;font-size:.9rem}
+
 .ticket-total{background:var(--bg);margin:16px 0;padding:16px;display:flex;justify-content:space-between;align-items:center}
 .ticket-total .tl{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 .ticket-total .tp{font-family:var(--font-h);font-size:2rem;font-weight:600;color:var(--gold)}
@@ -43,10 +49,17 @@ footer{text-align:center;padding:20px;font-size:.78rem;color:var(--muted);border
     </div>
     <div class="ticket-body">
       <div class="detail-row"><span class="lbl">Guest</span><span class="val" th:text="${booking.guest.name}"></span></div>
-      <div class="detail-row"><span class="lbl">Room</span><span class="val" th:text="${booking.room.roomType} + ' · Room ' + ${booking.room.roomNumber}"></span></div>
+      <div class="detail-row"><span class="lbl">Room</span><span class="val" th:text="${booking.room.roomType} + ' &middot; Room ' + ${booking.room.roomNumber}"></span></div>
       <div class="detail-row"><span class="lbl">Check-In</span><span class="val" th:text="${booking.checkInDate}"></span></div>
       <div class="detail-row"><span class="lbl">Check-Out</span><span class="val" th:text="${booking.checkOutDate}"></span></div>
       <div class="detail-row"><span class="lbl">Status</span><span class="val" style="color:var(--green)">&#10003; Confirmed</span></div>
+
+      <!-- STRATEGY PATTERN — which algorithm was used to calculate this price -->
+      <div class="strategy-row" th:if="${pricingStrategy}">
+        <span class="lbl">&#9670; Pricing Strategy Used</span>
+        <span class="val" th:text="${pricingStrategy}"></span>
+      </div>
+
       <div class="ticket-total">
         <span class="tl">Total Charged</span>
         <span class="tp">&#8377;<span th:text="${booking.totalPrice}"></span></span>

@@ -15,6 +15,8 @@ import com.pesu.hotelmanagement.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.time.LocalDate;
+
 @Controller
 public class WebController {
 
@@ -22,19 +24,17 @@ public class WebController {
     @Autowired private BookingService bookingService;
     @Autowired private UserService    userService;
 
-    // ---------------------------------------------------------------
-    // ROOM LISTING
-    // ---------------------------------------------------------------
+    // ── ROOMS ──────────────────────────────────────────────────────────────────
 
     @GetMapping("/rooms")
-    public String viewAvailableRooms(
+    public String viewRooms(
             @RequestParam(required = false) String checkIn,
             @RequestParam(required = false) String checkOut,
             Model model) {
 
         if (checkIn != null && checkOut != null) {
-            java.time.LocalDate in  = java.time.LocalDate.parse(checkIn);
-            java.time.LocalDate out = java.time.LocalDate.parse(checkOut);
+            LocalDate in  = LocalDate.parse(checkIn);
+            LocalDate out = LocalDate.parse(checkOut);
             model.addAttribute("availableRooms", roomService.getAvailableRoomsByDates(in, out));
             model.addAttribute("searchCheckIn",  checkIn);
             model.addAttribute("searchCheckOut", checkOut);
@@ -44,16 +44,29 @@ public class WebController {
         return "rooms";
     }
 
-    // ---------------------------------------------------------------
-    // BOOKING FLOW
-    // ---------------------------------------------------------------
+    // ── BOOKING FORM ───────────────────────────────────────────────────────────
 
     @GetMapping("/book/{roomId}")
-    public String showBookingForm(@PathVariable Long roomId, Model model, HttpSession session) {
+    public String showBookingForm(@PathVariable Long roomId,
+                                   @RequestParam(required = false) String checkIn,
+                                   @RequestParam(required = false) String checkOut,
+                                   Model model, HttpSession session) {
         if (session.getAttribute("loggedInUser") == null) return "redirect:/login";
+
         model.addAttribute("room", roomService.getRoomById(roomId));
+
+        // Pass strategy name if dates already selected (from rooms page search)
+        if (checkIn != null && checkOut != null) {
+            LocalDate in  = LocalDate.parse(checkIn);
+            LocalDate out = LocalDate.parse(checkOut);
+            model.addAttribute("pricingStrategy", bookingService.getStrategyName(in, out));
+            model.addAttribute("preCheckIn",  checkIn);
+            model.addAttribute("preCheckOut", checkOut);
+        }
         return "booking-form";
     }
+
+    // ── CONFIRM BOOKING ────────────────────────────────────────────────────────
 
     @PostMapping("/book/confirm")
     public String confirmBooking(
@@ -66,12 +79,19 @@ public class WebController {
         if (loggedInUser == null) return "redirect:/login";
 
         try {
-            java.time.LocalDate checkInDate  = java.time.LocalDate.parse(checkIn);
-            java.time.LocalDate checkOutDate = java.time.LocalDate.parse(checkOut);
+            LocalDate checkInDate  = LocalDate.parse(checkIn);
+            LocalDate checkOutDate = LocalDate.parse(checkOut);
+
+            // Capture strategy name BEFORE creating the booking
+            String strategyName = bookingService.getStrategyName(checkInDate, checkOutDate);
+
             com.pesu.hotelmanagement.model.Booking booking =
                     bookingService.createBooking(loggedInUser.getId(), roomId, checkInDate, checkOutDate);
+
             model.addAttribute("booking", booking);
+            model.addAttribute("pricingStrategy", strategyName); // shown on success page
             return "booking-success";
+
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("room", roomService.getRoomById(roomId));
@@ -79,9 +99,7 @@ public class WebController {
         }
     }
 
-    // ---------------------------------------------------------------
-    // MY BOOKINGS + CANCEL
-    // ---------------------------------------------------------------
+    // ── MY BOOKINGS ────────────────────────────────────────────────────────────
 
     @GetMapping("/my-bookings")
     public String myBookings(HttpSession session, Model model) {
@@ -92,7 +110,8 @@ public class WebController {
     }
 
     @PostMapping("/bookings/cancel/{bookingId}")
-    public String cancelBooking(@PathVariable Long bookingId, HttpSession session, Model model) {
+    public String cancelBooking(@PathVariable Long bookingId,
+                                 HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) return "redirect:/login";
         try {
@@ -103,43 +122,38 @@ public class WebController {
         return "redirect:/my-bookings";
     }
 
-    // ---------------------------------------------------------------
-    // AUTH
-    // ---------------------------------------------------------------
+    // ── AUTH ───────────────────────────────────────────────────────────────────
 
     @GetMapping("/register")
-    public String showRegisterForm() { return "register"; }
+    public String showRegister() { return "register"; }
 
     @PostMapping("/register")
-    public String processRegistration(
+    public String processRegister(
             @RequestParam String name,
             @RequestParam String email,
             @RequestParam String password,
             Model model) {
-
         if (userService.emailExists(email)) {
             model.addAttribute("error", "An account with this email already exists.");
             return "register";
         }
-        // FACTORY PATTERN — role is always GUEST for public sign-ups
         userService.registerGuest(name, email, password);
         return "redirect:/login";
     }
 
     @GetMapping("/login")
-    public String showLoginForm() { return "login"; }
+    public String showLogin() { return "login"; }
 
     @PostMapping("/login")
     public String processLogin(
             @RequestParam String email,
             @RequestParam String password,
             HttpSession session, Model model) {
-
         User user = userService.authenticate(email, password);
         if (user != null) {
             session.setAttribute("loggedInUser", user);
-            if ("ADMIN".equals(user.getRole()))  return "redirect:/admin/dashboard";
-            if ("STAFF".equals(user.getRole()))  return "redirect:/staff/dashboard";
+            if ("ADMIN".equals(user.getRole())) return "redirect:/admin/dashboard";
+            if ("STAFF".equals(user.getRole())) return "redirect:/staff/dashboard";
             return "redirect:/rooms";
         }
         model.addAttribute("error", "Invalid email or password.");
